@@ -7,6 +7,9 @@ import { LoginPage } from '@/pages/LoginPage';
 import { SignupPage } from '@/pages/SignupPage';
 import { AdminLoginPage } from '@/pages/AdminLoginPage';
 import { UserDashboardPage } from '@/pages/UserDashboardPage';
+import { HomePage } from '@/pages/HomePage';
+import { FormsPage } from '@/pages/FormsPage';
+import { FormBuilderPage } from '@/pages/FormBuilderPage';
 
 function App() {
   return (
@@ -37,6 +40,10 @@ function App() {
               </ProtectedRoute>
             }
           >
+            <Route path="/admin" element={<HomePage />} />
+            <Route path="/admin/forms" element={<FormsPage />} />
+            <Route path="/admin/forms/new" element={<FormBuilderPage />} />
+            <Route path="/admin/forms/edit/:id" element={<FormBuilderPage />} />
           </Route>
 
           {/* Fallback */}

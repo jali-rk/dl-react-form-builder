@@ -131,7 +131,7 @@ export function FormsPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Forms</h1>
-        <Button onClick={() => navigate('/forms/new')} className="gap-2">
+        <Button onClick={() => navigate('/admin/forms/new')} className="gap-2">
           Create New Form
         </Button>
       </div>
@@ -215,7 +215,7 @@ export function FormsPage() {
                   <td colSpan={6} className="py-16 text-center text-sm text-gray-400">
                     No forms found.{' '}
                     <button
-                      onClick={() => navigate('/forms/new')}
+                      onClick={() => navigate('/admin/forms/new')}
                       className="text-gray-900 underline underline-offset-2"
                     >
                       Create one
@@ -261,7 +261,7 @@ export function FormsPage() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
-                            onClick={() => navigate(`/forms/view/${form.id}`)}
+                            onClick={() => navigate(`/admin/forms/view/${form.id}`)}
                             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 mx-auto"
                           >
                             <Eye className="h-4 w-4" />
@@ -307,7 +307,7 @@ export function FormsPage() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
-                              onClick={() => navigate(`/forms/edit/${form.id}`)}
+                              onClick={() => navigate(`/admin/forms/edit/${form.id}`)}
                               className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700"
                             >
                               <Pencil className="h-4 w-4" />
@@ -342,7 +342,7 @@ export function FormsPage() {
                           variant="outline"
                           size="sm"
                           className="h-8 gap-1.5 text-xs"
-                          onClick={() => navigate(`/forms/responses/${form.id}`)}
+                          onClick={() => navigate(`/admin/forms/responses/${form.id}`)}
                         >
                           <BarChart2 className="h-3.5 w-3.5" />
                           View Responses

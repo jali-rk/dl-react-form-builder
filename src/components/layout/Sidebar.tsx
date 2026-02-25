@@ -5,9 +5,8 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
-  { icon: FileText, label: 'Forms', href: '/forms' },
-  { icon: Settings, label: 'Settings', href: '/settings' },
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
+  { icon: FileText, label: 'Forms', href: '/admin/forms' },
 ];
 
 export function Sidebar() {
@@ -35,7 +34,7 @@ export function Sidebar() {
       {/* Nav items */}
       <nav className="flex flex-col gap-1 p-2 flex-1">
         {navItems.map(({ icon: Icon, label, href }) => {
-          const active = location.pathname === href || (href !== '/' && location.pathname.startsWith(href));
+          const active = location.pathname === href || (href !== '/admin' && location.pathname.startsWith(href));
           return (
             <Tooltip key={href} delayDuration={0}>
               <TooltipTrigger asChild>

@@ -3,24 +3,25 @@ import { Bell, ChevronRight, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const breadcrumbMap: Record<string, string> = {
-  '/': 'Home',
-  '/forms': 'Forms',
-  '/forms/new': 'Form Builder',
-  '/forms/edit': 'Form Builder',
+  '/admin': 'Dashboard',
+  '/admin/forms': 'Forms',
+  '/admin/forms/new': 'Form Builder',
+  '/admin/forms/edit': 'Form Builder',
 };
 
 function getBreadcrumbs(pathname: string): { label: string; href: string }[] {
-  const crumbs: { label: string; href: string }[] = [{ label: 'Home', href: '/' }];
+  const crumbs: { label: string; href: string }[] = [{ label: 'Dashboard', href: '/admin' }];
 
-  if (pathname === '/') return crumbs;
+  if (pathname === '/admin') return crumbs;
 
-  if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
-    // Edit path e.g. /forms/edit/:id
-    crumbs.push({ label: 'Forms', href: '/forms' });
-    crumbs.push({ label: 'Form Builder', href: pathname });
+  if (pathname.startsWith('/admin/forms/edit/')) {
+    crumbs.push(
+      { label: 'Forms', href: '/admin/forms' },
+      { label: 'Form Builder', href: pathname },
+    );
   } else if (breadcrumbMap[pathname]) {
-    const parts = pathname.split('/').filter(Boolean);
-    let current = '';
+    const parts = pathname.replace('/admin', '').split('/').filter(Boolean);
+    let current = '/admin';
     for (const part of parts) {
       current += `/${part}`;
       if (breadcrumbMap[current]) {

@@ -40,7 +40,7 @@ export function FormBuilderPage() {
         setFormType(form.type);
         setFields(form.fields);
       })
-      .catch(() => navigate('/forms'))
+      .catch(() => navigate('/admin/forms'))
       .finally(() => setLoading(false));
   }, [id, navigate]);
 
@@ -91,7 +91,7 @@ export function FormBuilderPage() {
       } else {
         await formsApi.create({ name: formName, type: formType, fields });
       }
-      navigate('/forms');
+      navigate('/admin/forms');
     } finally {
       setSaving(false);
     }
@@ -111,7 +111,7 @@ export function FormBuilderPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Form Builder</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate('/forms')} disabled={saving}>
+          <Button variant="outline" onClick={() => navigate('/admin/forms')} disabled={saving}>
             Discard
           </Button>
           <Button onClick={handleSave} disabled={saving}>
