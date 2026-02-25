@@ -1,5 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Bell, ChevronRight } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Bell, ChevronRight, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const breadcrumbMap: Record<string, string> = {
   '/': 'Home',
@@ -33,7 +34,25 @@ function getBreadcrumbs(pathname: string): { label: string; href: string }[] {
 
 export function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, appUser, signOut } = useAuth();
   const crumbs = getBreadcrumbs(location.pathname);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
+  const displayName = appUser?.displayName ?? user?.displayName ?? 'User';
+
+  const initials = displayName === 'User'
+    ? 'U'
+    : displayName
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6">
@@ -61,13 +80,25 @@ export function Header() {
 
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-400 text-white text-xs font-semibold overflow-hidden">
-            KJ
+            {initials}
           </div>
           <div className="hidden sm:block">
-            <p className="text-xs font-semibold text-gray-900 leading-none">Kavindu Jayasekara</p>
-            <p className="text-xs text-gray-400 leading-none mt-0.5">123456</p>
+            <p className="text-xs font-semibold text-gray-900 leading-none">
+              {displayName}
+            </p>
+            <p className="text-xs text-gray-400 leading-none mt-0.5">
+              {appUser?.role === 'admin' ? 'Admin' : 'User'}
+            </p>
           </div>
         </div>
+
+        <button
+          onClick={handleSignOut}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          title="Sign out"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
       </div>
     </header>
   );
