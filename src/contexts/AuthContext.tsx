@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   updateProfile,
+  sendEmailVerification,
   GoogleAuthProvider,
   signInWithPopup,
   type User,
@@ -83,6 +84,11 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     skipAuthListenerRef.current = true;
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
+      if (!cred.user.emailVerified) {
+        await firebaseSignOut(auth);
+        skipAuthListenerRef.current = false;
+        throw new Error('Please verify your email address before logging in. Check your inbox.');
+      }
       const existing = await fetchAppUser(cred.user.uid);
       if (!existing) {
         await firebaseSignOut(auth);
@@ -112,6 +118,10 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         updateProfile(cred.user, { displayName }),
         createAppUser(cred.user.uid, email, displayName, 'user'),
       ]);
+      await sendEmailVerification(cred.user, {
+        url: `${globalThis.location.origin}/login`,
+        handleCodeInApp: false,
+      });
       await firebaseSignOut(auth);
       setUser(null);
       setAppUser(null);

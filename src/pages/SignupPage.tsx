@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileText, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { FileText, Eye, EyeOff, Loader2, Mail, ArrowRight, Inbox, CheckCircle2, ExternalLink } from 'lucide-react';
 
 export function SignupPage() {
   const { signUp, googleSignIn } = useAuth();
-  const navigate = useNavigate();
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -18,6 +17,7 @@ export function SignupPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,7 +36,7 @@ export function SignupPage() {
     setLoading(true);
     try {
       await signUp(email, password, displayName);
-      navigate('/login');
+      setEmailSent(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Signup failed. Please try again.');
     } finally {
@@ -77,6 +77,86 @@ export function SignupPage() {
             <span className="font-bold text-xl text-gray-900">FormBuilder</span>
           </div>
 
+          {emailSent ? (
+            <div className="space-y-8">
+              {/* Success header */}
+              <div className="text-center space-y-3">
+                <div className="flex justify-center">
+                  <div className="relative">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50 ring-8 ring-green-50/50">
+                      <Mail className="h-10 w-10 text-green-600" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-green-500 ring-4 ring-white">
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <h1 className="text-2xl font-bold text-gray-900">Check your email</h1>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  We've sent a verification link to
+                </p>
+                <p className="font-semibold text-gray-900">{email}</p>
+              </div>
+
+              {/* Steps card */}
+              <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-5 space-y-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Next steps</p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-900 text-[11px] font-bold text-white">1</div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Open your inbox</p>
+                      <p className="text-xs text-gray-500">Look for an email from FormBuilder</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-900 text-[11px] font-bold text-white">2</div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Click the verification link</p>
+                      <p className="text-xs text-gray-500">This activates your account</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-900 text-[11px] font-bold text-white">3</div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Come back and log in</p>
+                      <p className="text-xs text-gray-500">Use the button below to sign in</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Spam notice */}
+              <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                <Inbox className="h-5 w-5 shrink-0 text-amber-600 mt-0.5" />
+                <p className="text-sm text-amber-700">
+                  Can't find the email? Check your <span className="font-medium">spam</span> or <span className="font-medium">junk</span> folder.
+                </p>
+              </div>
+
+              {/* Action buttons */}
+              <div className="space-y-3">
+                <Link to="/login" className="block">
+                  <Button className="w-full gap-2">
+                    Go to Login
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <a
+                  href="https://mail.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <Button variant="outline" className="w-full gap-2">
+                    Open Gmail
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </a>
+              </div>
+            </div>
+          ) : (
+          <>
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
             <p className="text-gray-500">Get started with FormBuilder for free</p>
@@ -214,6 +294,8 @@ export function SignupPage() {
               Sign in
             </Link>
           </div>
+          </>
+          )}
         </div>
       </div>
     </div>
