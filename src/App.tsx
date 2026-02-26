@@ -12,6 +12,7 @@ import { HomePage } from '@/pages/HomePage';
 import { FormsPage } from '@/pages/FormsPage';
 import { FormBuilderPage } from '@/pages/FormBuilderPage';
 import { FormViewPage } from '@/pages/FormViewPage';
+import { FormResponsesPage } from '@/pages/FormResponsesPage';
 import { PublicFormPage } from '@/pages/PublicFormPage';
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
             <Route path="/admin/forms/new" element={<FormBuilderPage />} />
             <Route path="/admin/forms/edit/:id" element={<FormBuilderPage />} />
             <Route path="/admin/forms/view/:id" element={<FormViewPage />} />
+            <Route path="/admin/forms/responses/:id" element={<FormResponsesPage />} />
           </Route>
 
           {/* Fallback */}

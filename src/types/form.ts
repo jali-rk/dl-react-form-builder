@@ -79,6 +79,7 @@ export interface FormResponse {
   id: string;
   form_id: string;
   user_id: string;
+  user_name: string;
   submitted_at: string;
   answers: FormAnswer[];
 }

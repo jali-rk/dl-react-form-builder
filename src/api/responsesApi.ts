@@ -1,6 +1,8 @@
 import {
   collection,
   addDoc,
+  doc,
+  getDoc,
   getDocs,
   query,
   where,
@@ -39,11 +41,23 @@ export const responsesApi = {
       throw new Error('You have already submitted this form.');
     }
 
+    // Look up user display name
+    let userName = 'Unknown User';
+    try {
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      if (userDoc.exists()) {
+        userName = (userDoc.data().displayName as string) || userName;
+      }
+    } catch {
+      // Fall back to default name
+    }
+
     const now = Timestamp.now();
 
     const docData = {
       form_id: formId,
       user_id: userId,
+      user_name: userName,
       submitted_at: now,
       answers,
     };
@@ -54,6 +68,7 @@ export const responsesApi = {
       id: docRef.id,
       form_id: formId,
       user_id: userId,
+      user_name: userName,
       submitted_at: now.toDate().toISOString(),
       answers,
     };
@@ -86,6 +101,7 @@ export const responsesApi = {
         id: d.id,
         form_id: data.form_id as string,
         user_id: data.user_id as string,
+        user_name: (data.user_name as string) || 'Unknown User',
         submitted_at:
           data.submitted_at instanceof Timestamp
             ? data.submitted_at.toDate().toISOString()
