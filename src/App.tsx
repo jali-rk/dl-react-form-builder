@@ -6,6 +6,7 @@ import { Layout } from '@/components/layout/Layout';
 import { LoginPage } from '@/pages/LoginPage';
 import { SignupPage } from '@/pages/SignupPage';
 import { AdminLoginPage } from '@/pages/AdminLoginPage';
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { UserDashboardPage } from '@/pages/UserDashboardPage';
 import { HomePage } from '@/pages/HomePage';
 import { FormsPage } from '@/pages/FormsPage';
@@ -20,6 +21,7 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
           <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
+          <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
           <Route path="/admin/login" element={<GuestRoute><AdminLoginPage /></GuestRoute>} />
 
           {/* User dashboard */}

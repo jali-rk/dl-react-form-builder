@@ -6,6 +6,7 @@ import {
   signOut as firebaseSignOut,
   updateProfile,
   sendEmailVerification,
+  sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup,
   type User,
@@ -24,6 +25,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   adminSignIn: (email: string, password: string) => Promise<void>;
   googleSignIn: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -182,6 +184,13 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    await sendPasswordResetEmail(auth, email, {
+      url: `${globalThis.location.origin}/login`,
+      handleCodeInApp: false,
+    });
+  };
+
   const signOut = async () => {
     await firebaseSignOut(auth);
     setUser(null);
@@ -189,7 +198,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   };
 
   const value = useMemo(
-    () => ({ user, appUser, loading, signIn, signUp, adminSignIn, googleSignIn, signOut }),
+    () => ({ user, appUser, loading, signIn, signUp, adminSignIn, googleSignIn, resetPassword, signOut }),
     [user, appUser, loading],
   );
 
