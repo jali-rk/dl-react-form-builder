@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
@@ -8,6 +8,7 @@ interface GuestRouteProps {
 
 export function GuestRoute({ children }: GuestRouteProps) {
   const { user, appUser, loading } = useAuth();
+  const [searchParams] = useSearchParams();
 
   if (loading) {
     return (
@@ -17,11 +18,13 @@ export function GuestRoute({ children }: GuestRouteProps) {
     );
   }
 
-  // If already authenticated, redirect based on role
+  // If already authenticated, redirect based on role or redirect param
   if (user && appUser) {
-    const target = appUser.role === 'admin' ? '/admin' : '/user/dashboard';
+    const redirectParam = searchParams.get('redirect');
+    const target = redirectParam || (appUser.role === 'admin' ? '/admin' : '/user/dashboard');
     return <Navigate to={target} replace />;
   }
 
   return <>{children}</>;
 }
+

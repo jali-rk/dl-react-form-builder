@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,10 @@ import { FileText, Eye, EyeOff, Loader2 } from 'lucide-react';
 export function LoginPage() {
   const { signIn, googleSignIn } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Where to go after login (default: user dashboard)
+  const redirectTo = searchParams.get('redirect') || '/user/dashboard';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +27,7 @@ export function LoginPage() {
     setLoading(true);
     try {
       await signIn(email, password);
-      navigate('/user/dashboard');
+      navigate(redirectTo);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
     } finally {
@@ -139,8 +143,7 @@ export function LoginPage() {
               setGoogleLoading(true);
               try {
                 await googleSignIn();
-                // Navigation is handled by GuestRoute which detects
-                // authenticated users and redirects based on role
+                navigate(redirectTo);
               } catch (err: unknown) {
                 const msg = err instanceof Error ? err.message : 'Google sign-in failed.';
                 // Don't show error when user intentionally closes popup
@@ -179,7 +182,7 @@ export function LoginPage() {
 
           <div className="text-center text-sm text-gray-500">
             Don't have an account?{' '}
-            <Link to="/signup" className="font-medium text-gray-900 hover:underline">
+            <Link to={`/signup${redirectTo !== '/user/dashboard' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`} className="font-medium text-gray-900 hover:underline">
               Sign up
             </Link>
           </div>

@@ -122,4 +122,58 @@ export const responsesApi = {
     const snapshot = await getDocs(q);
     return snapshot.size;
   },
+
+  /**
+   * Get all responses submitted by a specific user (across all forms).
+   * Returns enriched objects that include the form name for display.
+   */
+  async listByUser(userId: string): Promise<(FormResponse & { form_name: string })[]> {
+    let snapshot;
+    try {
+      const q = query(
+        collection(db, RESPONSES_COLLECTION),
+        where('user_id', '==', userId),
+        orderBy('submitted_at', 'desc'),
+      );
+      snapshot = await getDocs(q);
+    } catch {
+      // Fallback without ordering if index not ready
+      const q = query(
+        collection(db, RESPONSES_COLLECTION),
+        where('user_id', '==', userId),
+      );
+      snapshot = await getDocs(q);
+    }
+
+    // Map the raw docs and look up form names
+    const responses = await Promise.all(
+      snapshot.docs.map(async (d) => {
+        const data = d.data();
+        let formName = 'Unknown Form';
+        try {
+          const formDoc = await getDoc(doc(db, 'forms', data.form_id as string));
+          if (formDoc.exists()) {
+            formName = (formDoc.data().form_name as string) || formName;
+          }
+        } catch {
+          // Fall back to default name
+        }
+
+        return {
+          id: d.id,
+          form_id: data.form_id as string,
+          form_name: formName,
+          user_id: data.user_id as string,
+          user_name: (data.user_name as string) || 'Unknown User',
+          submitted_at:
+            data.submitted_at instanceof Timestamp
+              ? data.submitted_at.toDate().toISOString()
+              : (data.submitted_at as string),
+          answers: (data.answers as FormAnswer[]) ?? [],
+        };
+      }),
+    );
+
+    return responses;
+  },
 };
