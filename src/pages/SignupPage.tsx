@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileText, Eye, EyeOff, Loader2, Mail, ArrowRight, Inbox, CheckCircle2, ExternalLink } from 'lucide-react';
+import { FileText, Eye, EyeOff, Loader2, Mail, ArrowRight, Inbox, CheckCircle2, ExternalLink, Circle, Check } from 'lucide-react';
 
 export function SignupPage() {
   const { signUp, googleSignIn } = useAuth();
@@ -19,6 +19,28 @@ export function SignupPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
+  const passwordRequirements = useMemo(() => {
+    return [
+      { label: 'At least 8 characters', met: password.length >= 8 },
+      { label: 'One uppercase letter', met: /[A-Z]/.test(password) },
+      { label: 'One lowercase letter', met: /[a-z]/.test(password) },
+      { label: 'One number', met: /\d/.test(password) },
+      { label: 'One special character (!@#$...)', met: /[^A-Za-z0-9]/.test(password) },
+    ];
+  }, [password]);
+
+  const strengthScore = useMemo(() => {
+    return passwordRequirements.filter((r) => r.met).length;
+  }, [passwordRequirements]);
+
+  const strengthLabel = useMemo(() => {
+    if (password.length === 0) return { text: '', color: '', barColor: '' };
+    if (strengthScore <= 2) return { text: 'Weak', color: 'text-red-500', barColor: 'bg-red-500' };
+    if (strengthScore <= 3) return { text: 'Fair', color: 'text-orange-500', barColor: 'bg-orange-500' };
+    if (strengthScore <= 4) return { text: 'Good', color: 'text-yellow-500', barColor: 'bg-yellow-500' };
+    return { text: 'Strong', color: 'text-green-500', barColor: 'bg-green-500' };
+  }, [password, strengthScore]);
+
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
@@ -28,8 +50,8 @@ export function SignupPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    if (strengthScore < 4) {
+      setError('Please choose a stronger password. Meet at least 4 of the 5 requirements.');
       return;
     }
 
@@ -212,6 +234,51 @@ export function SignupPage() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+
+              {/* Password strength meter */}
+              {password.length > 0 && (
+                <div className="space-y-3 pt-1">
+                  {/* Strength bar */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-400">Password strength</span>
+                      <span className={`text-xs font-semibold ${strengthLabel.color}`}>
+                        {strengthLabel.text}
+                      </span>
+                    </div>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((segment) => (
+                        <div
+                          key={`strength-${segment}`}
+                          className={`h-1.5 flex-1 rounded-full transition-colors ${
+                            segment <= strengthScore ? strengthLabel.barColor : 'bg-gray-200'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Requirements checklist */}
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {passwordRequirements.map((req) => (
+                      <div key={req.label} className="flex items-center gap-2">
+                        {req.met ? (
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                        ) : (
+                          <Circle className="h-3.5 w-3.5 text-gray-300" />
+                        )}
+                        <span
+                          className={`text-xs ${
+                            req.met ? 'text-green-600' : 'text-gray-400'
+                          }`}
+                        >
+                          {req.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
