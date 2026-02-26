@@ -34,6 +34,7 @@ export interface FormTemplate {
   type: FormType;
   status: FormStatus;
   fields: FormField[];
+  creator_id: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,6 +43,7 @@ export interface CreateFormDto {
   name: string;
   type: FormType;
   fields: Omit<FormField, 'id'>[];
+  creator_id: string;
 }
 
 export interface UpdateFormDto {

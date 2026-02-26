@@ -11,12 +11,14 @@ import { FormCanvas } from '@/components/form-builder/FormCanvas';
 import { FormPreview } from '@/components/form-builder/FormPreview';
 import { BLOCK_DEFINITIONS } from '@/components/form-builder/BlockPalette';
 import { formsApi } from '@/api/formsApi';
+import { useAuth } from '@/contexts/AuthContext';
 import type { FormField, FieldType, FormType } from '@/types/form';
 
 export function FormBuilderPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
   const isEditing = Boolean(id);
+  const { user } = useAuth();
 
   /* ---- Form meta state ---- */
   const [formName, setFormName] = useState('');
@@ -89,9 +91,17 @@ export function FormBuilderPage() {
       if (isEditing && id) {
         await formsApi.update(id, { name: formName, type: formType, fields });
       } else {
-        await formsApi.create({ name: formName, type: formType, fields });
+        await formsApi.create({
+          name: formName,
+          type: formType,
+          fields,
+          creator_id: user?.uid ?? '',
+        });
       }
       navigate('/admin/forms');
+    } catch (err) {
+      console.error('Failed to save form:', err);
+      alert(err instanceof Error ? err.message : 'Failed to save form. Please try again.');
     } finally {
       setSaving(false);
     }

@@ -56,6 +56,8 @@ export function FormsPage() {
       setForms(res.data);
       setTotal(res.total);
       setTotalPages(res.totalPages);
+    } catch (err) {
+      console.error('Failed to fetch forms:', err);
     } finally {
       setLoading(false);
     }
