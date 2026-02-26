@@ -12,6 +12,7 @@ import { HomePage } from '@/pages/HomePage';
 import { FormsPage } from '@/pages/FormsPage';
 import { FormBuilderPage } from '@/pages/FormBuilderPage';
 import { FormViewPage } from '@/pages/FormViewPage';
+import { PublicFormPage } from '@/pages/PublicFormPage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/forms/:id" element={<PublicFormPage />} />
           <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
           <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
           <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />

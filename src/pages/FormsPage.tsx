@@ -13,6 +13,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Filter,
+  Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,6 +49,8 @@ export function FormsPage() {
   const [loading, setLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<FormTemplate | null>(null);
   const [deletingBulk, setDeletingBulk] = useState(false);
+  const [publishedLink, setPublishedLink] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const fetchForms = useCallback(async () => {
     setLoading(true);
@@ -96,8 +99,17 @@ export function FormsPage() {
   };
 
   /* ---- Actions ---- */
+  const getFormLink = (formId: string) =>
+    `${globalThis.location.origin}/forms/${formId}`;
+
   const handleToggleStatus = async (form: FormTemplate) => {
-    await formsApi.toggleStatus(form.id);
+    const updated = await formsApi.toggleStatus(form.id);
+    if (updated.status === 'published') {
+      const link = getFormLink(form.id);
+      setPublishedLink(link);
+      setLinkCopied(false);
+      navigator.clipboard.writeText(link).catch(() => {});
+    }
     void fetchForms();
   };
 
@@ -122,7 +134,10 @@ export function FormsPage() {
   };
 
   const handleCopyLink = (id: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/forms/view/${id}`).catch(() => {});
+    const link = getFormLink(id);
+    navigator.clipboard.writeText(link).catch(() => {});
+    setPublishedLink(link);
+    setLinkCopied(false);
   };
 
   /* ---- Pagination ---- */
@@ -443,6 +458,53 @@ export function FormsPage() {
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Published link dialog */}
+      <Dialog open={!!publishedLink} onOpenChange={(open) => { if (!open) { setPublishedLink(null); setLinkCopied(false); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Form Link</DialogTitle>
+            <DialogDescription>
+              Share this link with others to access the form.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-2">
+            <Input
+              readOnly
+              value={publishedLink ?? ''}
+              className="flex-1 text-sm font-mono"
+              onFocus={(e) => e.target.select()}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 shrink-0"
+              onClick={() => {
+                navigator.clipboard.writeText(publishedLink ?? '').catch(() => {});
+                setLinkCopied(true);
+                setTimeout(() => setLinkCopied(false), 2000);
+              }}
+            >
+              {linkCopied ? (
+                <>
+                  <Check className="h-4 w-4 text-green-500" />
+                  Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  Copy
+                </>
+              )}
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setPublishedLink(null); setLinkCopied(false); }}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

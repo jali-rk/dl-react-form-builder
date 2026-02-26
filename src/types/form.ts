@@ -67,3 +67,18 @@ export interface FormListParams {
   page?: number;
   pageSize?: number;
 }
+
+export interface FormAnswer {
+  field_id: string;
+  field_label: string;
+  field_type: FieldType;
+  value: string | string[];
+}
+
+export interface FormResponse {
+  id: string;
+  form_id: string;
+  user_id: string;
+  submitted_at: string;
+  answers: FormAnswer[];
+}
