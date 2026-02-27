@@ -1,7 +1,8 @@
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function UserDashboardPage() {
   const { user, appUser, signOut } = useAuth();

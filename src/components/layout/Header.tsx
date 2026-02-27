@@ -1,5 +1,6 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, ChevronRight, LogOut } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+
 import { useAuth } from '@/contexts/AuthContext';
 
 const breadcrumbMap: Record<string, string> = {

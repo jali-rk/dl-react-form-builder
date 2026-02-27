@@ -1,8 +1,9 @@
-import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, FileText, Settings, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
+import { Link, useLocation } from 'react-router-dom';
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
