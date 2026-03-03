@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+
+import { formsApi } from '@/api/formsApi';
+import { BLOCK_DEFINITIONS, BlockPalette } from '@/components/form-builder/BlockPalette';
+import { FormCanvas } from '@/components/form-builder/FormCanvas';
+import { FormPreview } from '@/components/form-builder/FormPreview';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { BlockPalette } from '@/components/form-builder/BlockPalette';
-import { FormCanvas } from '@/components/form-builder/FormCanvas';
-import { FormPreview } from '@/components/form-builder/FormPreview';
-import { BLOCK_DEFINITIONS } from '@/components/form-builder/BlockPalette';
-import { formsApi } from '@/api/formsApi';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import type { FormField, FieldType, FormType } from '@/types/form';
+import type { FieldType, FormField, FormType } from '@/types/form';
 
 export function FormBuilderPage() {
   const navigate = useNavigate();

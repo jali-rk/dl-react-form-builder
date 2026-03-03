@@ -12,6 +12,7 @@ import {
   type User,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+
 import { auth, db } from '@/lib/firebase';
 import type { AppUser, UserRole } from '@/types/auth';
 

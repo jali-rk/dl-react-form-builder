@@ -1,10 +1,11 @@
+import { useAuth } from '@/contexts/AuthContext';
+import { ArrowRight, Check, CheckCircle2, Circle, ExternalLink, Eye, EyeOff, FileText, Inbox, Loader2, Mail } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileText, Eye, EyeOff, Loader2, Mail, ArrowRight, Inbox, CheckCircle2, ExternalLink, Circle, Check } from 'lucide-react';
 
 export function SignupPage() {
   const { signUp, googleSignIn } = useAuth();

@@ -1,4 +1,3 @@
-import type { FieldType } from '@/types/form';
 import {
   Type,
   AlignLeft,
@@ -11,6 +10,8 @@ import {
   Minus,
   Text,
 } from 'lucide-react';
+
+import type { FieldType } from '@/types/form';
 
 export interface BlockDefinition {
   type: FieldType;

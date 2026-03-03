@@ -1,10 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { formsApi } from '@/api/formsApi';
+import { responsesApi } from '@/api/responsesApi';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -13,22 +9,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/contexts/AuthContext';
+import type { FormAnswer, FormField, FormResponse, FormTemplate } from '@/types/form';
 import {
-  LogOut,
-  FileText,
-  CheckCircle2,
-  XCircle,
   AlertCircle,
-  Loader2,
-  ClipboardList,
   ArrowLeft,
-  Eye,
+  CheckCircle2,
+  ClipboardList,
   Clock,
+  Eye,
+  FileText,
   Inbox,
+  Loader2,
+  LogOut,
+  XCircle,
 } from 'lucide-react';
-import { formsApi } from '@/api/formsApi';
-import { responsesApi } from '@/api/responsesApi';
-import type { FormTemplate, FormField, FormAnswer, FormResponse } from '@/types/form';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const LAYOUT_TYPES = new Set(['title', 'h2', 'h3', 'description', 'divider']);
 
