@@ -1,4 +1,5 @@
 import { Bell, ChevronRight, LogOut } from 'lucide-react';
+import { useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,7 +39,7 @@ export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, appUser, signOut } = useAuth();
-  const crumbs = getBreadcrumbs(location.pathname);
+  const crumbs = useMemo(() => getBreadcrumbs(location.pathname), [location.pathname]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -47,14 +48,18 @@ export function Header() {
 
   const displayName = appUser?.displayName ?? user?.displayName ?? 'User';
 
-  const initials = displayName === 'User'
-    ? 'U'
-    : displayName
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
+  const initials = useMemo(
+    () =>
+      displayName === 'User'
+        ? 'U'
+        : displayName
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2),
+    [displayName],
+  );
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6">
