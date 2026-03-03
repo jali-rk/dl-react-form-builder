@@ -64,7 +64,7 @@ export function Header() {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-gray-500">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-gray-500">
         {crumbs.map((crumb, index) => (
           <span key={crumb.href} className="flex items-center gap-1.5">
             {index > 0 && <ChevronRight className="h-3.5 w-3.5 text-gray-300" />}
@@ -81,7 +81,10 @@ export function Header() {
 
       {/* Right section */}
       <div className="flex items-center gap-3">
-        <button className="relative flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+        <button
+          aria-label="Notifications"
+          className="relative flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+        >
           <Bell className="h-4 w-4" />
         </button>
 
@@ -103,6 +106,7 @@ export function Header() {
           onClick={handleSignOut}
           className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
           title="Sign out"
+          aria-label="Sign out"
         >
           <LogOut className="h-4 w-4" />
         </button>

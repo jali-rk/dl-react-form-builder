@@ -12,8 +12,9 @@ export function GuestRoute({ children }: GuestRouteProps) {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center" role="status" aria-live="polite">
         <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <span className="sr-only">Loading…</span>
       </div>
     );
   }
@@ -21,8 +22,9 @@ export function GuestRoute({ children }: GuestRouteProps) {
   // User is authenticated but appUser data hasn't loaded yet — show loader to avoid accidental redirects
   if (user && !appUser) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center" role="status" aria-live="polite">
         <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <span className="sr-only">Loading…</span>
       </div>
     );
   }

@@ -14,8 +14,9 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center" role="status" aria-live="polite">
         <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <span className="sr-only">Loading…</span>
       </div>
     );
   }
@@ -27,8 +28,9 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   // User is authenticated but appUser profile is still loading from Firestore
   if (!appUser) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center" role="status" aria-live="polite">
         <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <span className="sr-only">Loading…</span>
       </div>
     );
   }
