@@ -20,8 +20,17 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     );
   }
 
-  if (!user || !appUser) {
+  if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // User is authenticated but appUser profile is still loading from Firestore
+  if (!appUser) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
   }
 
   // Redirect to correct dashboard if role doesn't match allowed roles

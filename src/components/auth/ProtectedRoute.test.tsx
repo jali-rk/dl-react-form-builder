@@ -54,7 +54,7 @@ describe('ProtectedRoute', () => {
     expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
   });
 
-  it('redirects to /login when user exists but appUser is null', () => {
+  it('shows a loading spinner when user exists but appUser is still loading', () => {
     mockUseAuth.mockReturnValue({
       user: { uid: '123' },
       appUser: null,
@@ -62,7 +62,9 @@ describe('ProtectedRoute', () => {
     });
     renderProtectedRoute();
 
-    expect(navigatedTo).toBe('/login');
+    expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
+    expect(document.querySelector('.animate-spin')).toBeInTheDocument();
+    expect(navigatedTo).toBeNull();
   });
 
   it('renders children when user role is in allowedRoles', () => {
