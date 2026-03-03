@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Settings, ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
