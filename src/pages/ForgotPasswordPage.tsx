@@ -1,10 +1,11 @@
+import { FileText, Loader2, Mail, ArrowLeft, CheckCircle2, Inbox } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileText, Loader2, Mail, ArrowLeft, CheckCircle2, Inbox } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function ForgotPasswordPage() {
   const { resetPassword } = useAuth();

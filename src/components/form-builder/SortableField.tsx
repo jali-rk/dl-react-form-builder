@@ -5,11 +5,12 @@ import {
   Settings2,
   Trash2,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { FieldEditorPanel } from './FieldEditorPanel';
-import type { FormField } from '@/types/form';
+
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
+import type { FormField } from '@/types/form';
+import { FieldEditorPanel } from './FieldEditorPanel';
 
 interface SortableFieldProps {
   field: FormField;

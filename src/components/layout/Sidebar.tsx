@@ -1,10 +1,17 @@
+import { ChevronLeft, ChevronRight, FileText, LayoutDashboard, type LucideIcon } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, Settings, ChevronRight, ChevronLeft } from 'lucide-react';
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-const navItems = [
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+
+interface NavItem {
+  icon: LucideIcon;
+  label: string;
+  href: string;
+}
+
+const navItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
   { icon: FileText, label: 'Forms', href: '/admin/forms' },
 ];
@@ -12,6 +19,16 @@ const navItems = [
 export function Sidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(true);
+
+  const activeHrefs = useMemo(
+    () =>
+      new Set(
+        navItems
+          .filter(({ href }) => location.pathname === href || (href !== '/admin' && location.pathname.startsWith(href)))
+          .map(({ href }) => href),
+      ),
+    [location.pathname],
+  );
 
   return (
     <aside
@@ -34,7 +51,7 @@ export function Sidebar() {
       {/* Nav items */}
       <nav className="flex flex-col gap-1 p-2 flex-1">
         {navItems.map(({ icon: Icon, label, href }) => {
-          const active = location.pathname === href || (href !== '/admin' && location.pathname.startsWith(href));
+          const active = activeHrefs.has(href);
           return (
             <Tooltip key={href} delayDuration={0}>
               <TooltipTrigger asChild>
@@ -65,6 +82,8 @@ export function Sidebar() {
       {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
+        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        aria-expanded={!collapsed}
         className="absolute -right-3 top-20 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 hover:text-gray-900 shadow-sm"
       >
         {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
