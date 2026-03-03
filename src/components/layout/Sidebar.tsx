@@ -1,11 +1,17 @@
-import { ChevronLeft, ChevronRight, FileText, LayoutDashboard } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, LayoutDashboard, type LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
-const navItems = [
+interface NavItem {
+  icon: LucideIcon;
+  label: string;
+  href: string;
+}
+
+const navItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
   { icon: FileText, label: 'Forms', href: '/admin/forms' },
 ];
