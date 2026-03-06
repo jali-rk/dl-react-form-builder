@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+
+import { formsApi } from '@/api/formsApi';
+import { BlockPalette, BLOCK_DEFINITIONS } from '@/components/form-builder/BlockPalette';
+import { FormCanvas } from '@/components/form-builder/FormCanvas';
+import { FormPreview } from '@/components/form-builder/FormPreview';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { BlockPalette } from '@/components/form-builder/BlockPalette';
-import { FormCanvas } from '@/components/form-builder/FormCanvas';
-import { FormPreview } from '@/components/form-builder/FormPreview';
-import { BLOCK_DEFINITIONS } from '@/components/form-builder/BlockPalette';
-import { formsApi } from '@/api/formsApi';
 import type { FormField, FieldType, FormType } from '@/types/form';
 
 export function FormBuilderPage() {
@@ -40,7 +40,7 @@ export function FormBuilderPage() {
         setFormType(form.type);
         setFields(form.fields);
       })
-      .catch(() => navigate('/forms'))
+      .catch(() => navigate('/admin/forms'))
       .finally(() => setLoading(false));
   }, [id, navigate]);
 
@@ -91,7 +91,7 @@ export function FormBuilderPage() {
       } else {
         await formsApi.create({ name: formName, type: formType, fields });
       }
-      navigate('/forms');
+      navigate('/admin/forms');
     } finally {
       setSaving(false);
     }
@@ -111,7 +111,7 @@ export function FormBuilderPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Form Builder</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate('/forms')} disabled={saving}>
+          <Button variant="outline" onClick={() => navigate('/admin/forms')} disabled={saving}>
             Discard
           </Button>
           <Button onClick={handleSave} disabled={saving}>

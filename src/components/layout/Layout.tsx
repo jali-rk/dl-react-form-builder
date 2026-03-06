@@ -1,7 +1,8 @@
 import { Outlet } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
-import { Header } from './Header';
+
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Header } from './Header';
+import { Sidebar } from './Sidebar';
 
 export function Layout() {
   return (

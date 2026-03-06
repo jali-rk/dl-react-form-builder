@@ -1,22 +1,58 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+import { GuestRoute } from '@/components/auth/GuestRoute';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Layout } from '@/components/layout/Layout';
-import { HomePage } from '@/pages/HomePage';
-import { FormsPage } from '@/pages/FormsPage';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { AdminLoginPage } from '@/pages/AdminLoginPage';
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { FormBuilderPage } from '@/pages/FormBuilderPage';
+import { FormsPage } from '@/pages/FormsPage';
+import { HomePage } from '@/pages/HomePage';
+import { LoginPage } from '@/pages/LoginPage';
+import { SignupPage } from '@/pages/SignupPage';
+import { UserDashboardPage } from '@/pages/UserDashboardPage';
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/forms" element={<FormsPage />} />
-          <Route path="/forms/new" element={<FormBuilderPage />} />
-          <Route path="/forms/edit/:id" element={<FormBuilderPage />} />
+      <AuthProvider>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+          <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
+          <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+          <Route path="/admin/login" element={<GuestRoute><AdminLoginPage /></GuestRoute>} />
+
+          {/* User dashboard */}
+          <Route
+            path="/user/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['user']}>
+                <UserDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin-only routes */}
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/admin" element={<HomePage />} />
+            <Route path="/admin/forms" element={<FormsPage />} />
+            <Route path="/admin/forms/new" element={<FormBuilderPage />} />
+            <Route path="/admin/forms/edit/:id" element={<FormBuilderPage />} />
+          </Route>
+
           {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

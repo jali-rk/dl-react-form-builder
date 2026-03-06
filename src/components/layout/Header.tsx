@@ -1,25 +1,29 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Bell, ChevronRight } from 'lucide-react';
+import { Bell, ChevronRight, LogOut } from 'lucide-react';
+import { useMemo } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+
+import { useAuth } from '@/contexts/AuthContext';
 
 const breadcrumbMap: Record<string, string> = {
-  '/': 'Home',
-  '/forms': 'Forms',
-  '/forms/new': 'Form Builder',
-  '/forms/edit': 'Form Builder',
+  '/admin': 'Dashboard',
+  '/admin/forms': 'Forms',
+  '/admin/forms/new': 'Form Builder',
+  '/admin/forms/edit': 'Form Builder',
 };
 
 function getBreadcrumbs(pathname: string): { label: string; href: string }[] {
-  const crumbs: { label: string; href: string }[] = [{ label: 'Home', href: '/' }];
+  const crumbs: { label: string; href: string }[] = [{ label: 'Dashboard', href: '/admin' }];
 
-  if (pathname === '/') return crumbs;
+  if (pathname === '/admin') return crumbs;
 
-  if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
-    // Edit path e.g. /forms/edit/:id
-    crumbs.push({ label: 'Forms', href: '/forms' });
-    crumbs.push({ label: 'Form Builder', href: pathname });
+  if (pathname.startsWith('/admin/forms/edit/')) {
+    crumbs.push(
+      { label: 'Forms', href: '/admin/forms' },
+      { label: 'Form Builder', href: pathname },
+    );
   } else if (breadcrumbMap[pathname]) {
-    const parts = pathname.split('/').filter(Boolean);
-    let current = '';
+    const parts = pathname.replace('/admin', '').split('/').filter(Boolean);
+    let current = '/admin';
     for (const part of parts) {
       current += `/${part}`;
       if (breadcrumbMap[current]) {
@@ -33,12 +37,34 @@ function getBreadcrumbs(pathname: string): { label: string; href: string }[] {
 
 export function Header() {
   const location = useLocation();
-  const crumbs = getBreadcrumbs(location.pathname);
+  const navigate = useNavigate();
+  const { user, appUser, signOut } = useAuth();
+  const crumbs = useMemo(() => getBreadcrumbs(location.pathname), [location.pathname]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
+  const displayName = appUser?.displayName ?? user?.displayName ?? 'User';
+
+  const initials = useMemo(
+    () =>
+      displayName === 'User'
+        ? 'U'
+        : displayName
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2),
+    [displayName],
+  );
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-gray-500">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-gray-500">
         {crumbs.map((crumb, index) => (
           <span key={crumb.href} className="flex items-center gap-1.5">
             {index > 0 && <ChevronRight className="h-3.5 w-3.5 text-gray-300" />}
@@ -55,19 +81,35 @@ export function Header() {
 
       {/* Right section */}
       <div className="flex items-center gap-3">
-        <button className="relative flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+        <button
+          aria-label="Notifications"
+          className="relative flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+        >
           <Bell className="h-4 w-4" />
         </button>
 
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-400 text-white text-xs font-semibold overflow-hidden">
-            KJ
+            {initials}
           </div>
           <div className="hidden sm:block">
-            <p className="text-xs font-semibold text-gray-900 leading-none">Kavindu Jayasekara</p>
-            <p className="text-xs text-gray-400 leading-none mt-0.5">123456</p>
+            <p className="text-xs font-semibold text-gray-900 leading-none">
+              {displayName}
+            </p>
+            <p className="text-xs text-gray-400 leading-none mt-0.5">
+              {appUser?.role === 'admin' ? 'Admin' : 'User'}
+            </p>
           </div>
         </div>
+
+        <button
+          onClick={handleSignOut}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          title="Sign out"
+          aria-label="Sign out"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
       </div>
     </header>
   );

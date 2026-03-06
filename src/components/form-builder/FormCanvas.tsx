@@ -7,15 +7,16 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { SortableField } from './SortableField';
+
 import type { FormField } from '@/types/form';
+import { SortableField } from './SortableField';
 
 interface FormCanvasProps {
   fields: FormField[];
