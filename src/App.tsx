@@ -7,6 +7,9 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { AdminLoginPage } from '@/pages/AdminLoginPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { FormBuilderPage } from '@/pages/FormBuilderPage';
+import { FormViewPage } from '@/pages/FormViewPage';
+import { FormResponsesPage } from '@/pages/FormResponsesPage';
+import { PublicFormPage } from '@/pages/PublicFormPage';
 import { FormsPage } from '@/pages/FormsPage';
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
@@ -20,6 +23,7 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/forms/:id" element={<PublicFormPage />} />
           <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
           <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
           <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
@@ -47,6 +51,8 @@ function App() {
             <Route path="/admin/forms" element={<FormsPage />} />
             <Route path="/admin/forms/new" element={<FormBuilderPage />} />
             <Route path="/admin/forms/edit/:id" element={<FormBuilderPage />} />
+            <Route path="/admin/forms/view/:id" element={<FormViewPage />} />
+            <Route path="/admin/forms/responses/:id" element={<FormResponsesPage />} />
           </Route>
 
           {/* Fallback */}

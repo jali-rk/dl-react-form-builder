@@ -34,6 +34,7 @@ export interface FormTemplate {
   type: FormType;
   status: FormStatus;
   fields: FormField[];
+  creator_id: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,6 +43,7 @@ export interface CreateFormDto {
   name: string;
   type: FormType;
   fields: Omit<FormField, 'id'>[];
+  creator_id: string;
 }
 
 export interface UpdateFormDto {
@@ -64,4 +66,20 @@ export interface FormListParams {
   status?: FormStatus | 'all';
   page?: number;
   pageSize?: number;
+}
+
+export interface FormAnswer {
+  field_id: string;
+  field_label: string;
+  field_type: FieldType;
+  value: string | string[];
+}
+
+export interface FormResponse {
+  id: string;
+  form_id: string;
+  user_id: string;
+  user_name: string;
+  submitted_at: string;
+  answers: FormAnswer[];
 }
