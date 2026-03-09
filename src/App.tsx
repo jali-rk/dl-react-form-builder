@@ -4,7 +4,6 @@ import { GuestRoute } from '@/components/auth/GuestRoute';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Layout } from '@/components/layout/Layout';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { AdminLoginPage } from '@/pages/AdminLoginPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { FormBuilderPage } from '@/pages/FormBuilderPage';
 import { FormViewPage } from '@/pages/FormViewPage';
@@ -27,7 +26,6 @@ function App() {
           <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
           <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
           <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
-          <Route path="/admin/login" element={<GuestRoute><AdminLoginPage /></GuestRoute>} />
 
           {/* User dashboard */}
           <Route
