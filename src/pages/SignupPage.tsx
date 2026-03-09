@@ -319,8 +319,9 @@ export function SignupPage() {
                   setError('');
                   setGoogleLoading(true);
                   try {
-                    await googleSignIn();
-                    navigate(redirectParam || '/user/dashboard');
+                    const loggedInUser = await googleSignIn();
+                    const target = redirectParam || (loggedInUser.role === 'admin' ? '/admin' : '/user/dashboard');
+                    navigate(target);
                   } catch (err: unknown) {
                     const msg = err instanceof Error ? err.message : 'Google sign-up failed.';
                     if (!msg.includes('popup-closed-by-user') && !msg.includes('cancelled-popup-request')) {

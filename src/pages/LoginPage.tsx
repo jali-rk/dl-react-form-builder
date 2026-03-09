@@ -12,8 +12,8 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Where to go after login (default: user dashboard)
-  const redirectTo = searchParams.get('redirect') || '/user/dashboard';
+  // Where to go after login (default: based on role)
+  const redirectTo = searchParams.get('redirect') || '';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,13 +22,16 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const getRedirectPath = (role: string) =>
+    redirectTo || (role === 'admin' ? '/admin' : '/user/dashboard');
+
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await signIn(email, password);
-      navigate(redirectTo);
+      const loggedInUser = await signIn(email, password);
+      navigate(getRedirectPath(loggedInUser.role));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
     } finally {
@@ -143,8 +146,8 @@ export function LoginPage() {
               setError('');
               setGoogleLoading(true);
               try {
-                await googleSignIn();
-                navigate(redirectTo);
+                const loggedInUser = await googleSignIn();
+                navigate(getRedirectPath(loggedInUser.role));
               } catch (err: unknown) {
                 const msg = err instanceof Error ? err.message : 'Google sign-in failed.';
                 // Don't show error when user intentionally closes popup
@@ -183,23 +186,8 @@ export function LoginPage() {
 
           <div className="text-center text-sm text-gray-500">
             Don't have an account?{' '}
-            <Link to={`/signup${redirectTo !== '/user/dashboard' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`} className="font-medium text-gray-900 hover:underline">
+            <Link to={redirectTo ? `/signup?redirect=${encodeURIComponent(redirectTo)}` : '/signup'} className="font-medium text-gray-900 hover:underline">
               Sign up
-            </Link>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-2 text-gray-400">or</span>
-            </div>
-          </div>
-
-          <div className="text-center text-sm text-gray-500">
-            <Link to="/admin/login" className="font-medium text-gray-900 hover:underline">
-              Admin Login
             </Link>
           </div>
         </div>

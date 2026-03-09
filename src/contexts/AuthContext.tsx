@@ -22,10 +22,9 @@ interface AuthContextType {
   user: User | null;
   appUser: AppUser | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<AppUser>;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
-  adminSignIn: (email: string, password: string) => Promise<void>;
-  googleSignIn: () => Promise<void>;
+  googleSignIn: () => Promise<AppUser>;
   resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -83,30 +82,27 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     return () => unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<AppUser> => {
     skipAuthListenerRef.current = true;
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      if (!cred.user.emailVerified) {
-        await firebaseSignOut(auth);
-        skipAuthListenerRef.current = false;
-        throw new Error('Please verify your email address before logging in. Check your inbox.');
-      }
       const existing = await fetchAppUser(cred.user.uid);
       if (!existing) {
         await firebaseSignOut(auth);
         skipAuthListenerRef.current = false;
         throw new Error('Account not found. Please sign up first.');
       }
-      if (existing.role !== 'user') {
+      // Only enforce email verification for non-admin users
+      if (existing.role !== 'admin' && !cred.user.emailVerified) {
         await firebaseSignOut(auth);
         skipAuthListenerRef.current = false;
-        throw new Error('Please use the admin login page.');
+        throw new Error('Please verify your email address before logging in. Check your inbox.');
       }
       setUser(cred.user);
       setAppUser(existing);
       setLoading(false);
       skipAuthListenerRef.current = false;
+      return existing;
     } catch (err) {
       skipAuthListenerRef.current = false;
       throw err;
@@ -133,52 +129,24 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     }
   };
 
-  const adminSignIn = async (email: string, password: string) => {
-    skipAuthListenerRef.current = true;
-    try {
-      const cred = await signInWithEmailAndPassword(auth, email, password);
-      const existing = await fetchAppUser(cred.user.uid);
-      if (!existing?.role || existing.role !== 'admin') {
-        await firebaseSignOut(auth);
-        skipAuthListenerRef.current = false;
-        throw new Error('Access denied. Admin privileges required.');
-      }
-      setUser(cred.user);
-      setAppUser(existing);
-      setLoading(false);
-      skipAuthListenerRef.current = false;
-    } catch (err) {
-      skipAuthListenerRef.current = false;
-      throw err;
-    }
-  };
-
-  const googleSignIn = async () => {
+  const googleSignIn = async (): Promise<AppUser> => {
     skipAuthListenerRef.current = true;
     try {
       const cred = await signInWithPopup(auth, googleProvider);
       // Check if user already exists in Firestore
       let existing = await fetchAppUser(cred.user.uid);
-      if (existing) {
-        // Existing user – must be 'user' role (not admin)
-        if (existing.role !== 'user') {
-          await firebaseSignOut(auth);
-          skipAuthListenerRef.current = false;
-          throw new Error('Please use the admin login page.');
-        }
-      } else {
-        // New user – auto-create with 'user' role
-        existing = await createAppUser(
-          cred.user.uid,
-          cred.user.email ?? '',
-          cred.user.displayName ?? 'User',
-          'user',
-        );
-      }
+      // New user – auto-create with 'user' role
+      existing ??= await createAppUser(
+        cred.user.uid,
+        cred.user.email ?? '',
+        cred.user.displayName ?? 'User',
+        'user',
+      );
       setUser(cred.user);
       setAppUser(existing);
       setLoading(false);
       skipAuthListenerRef.current = false;
+      return existing;
     } catch (err) {
       skipAuthListenerRef.current = false;
       throw err;
@@ -199,7 +167,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   };
 
   const value = useMemo(
-    () => ({ user, appUser, loading, signIn, signUp, adminSignIn, googleSignIn, resetPassword, signOut }),
+    () => ({ user, appUser, loading, signIn, signUp, googleSignIn, resetPassword, signOut }),
     [user, appUser, loading],
   );
 
