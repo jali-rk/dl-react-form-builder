@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Users, ChevronDown, ChevronRight, Inbox } from 'lucide-react';
+import { ArrowLeft, Download, Users, ChevronDown, ChevronRight, Inbox, PieChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formsApi } from '@/api/formsApi';
 import { responsesApi } from '@/api/responsesApi';
+import { ResponseCharts } from '@/components/form-builder/ResponseCharts';
 import type { FormTemplate, FormResponse, FormField, FormAnswer } from '@/types/form';
 
 export function FormResponsesPage() {
@@ -280,22 +282,37 @@ export function FormResponsesPage() {
         )}
       </div>
 
-      {/* Responses table */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        {/* Table header row */}
-        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-5 py-3">
-          <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+      {/* Tabs for Responses and Analytics */}
+      <Tabs defaultValue="responses" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="responses" className="gap-2">
             <Users className="h-4 w-4" />
-            <span>Responses</span>
-          </div>
-          <Badge variant="outline">{responses.length} total</Badge>
-        </div>
+            Responses
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-2">
+            <PieChart className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+        </TabsList>
 
-        {responses.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 mb-3">
-              <Inbox className="h-6 w-6 text-gray-400" />
+        {/* Responses Tab */}
+        <TabsContent value="responses">
+          {/* Responses table */}
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+            {/* Table header row */}
+            <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-5 py-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                <Users className="h-4 w-4" />
+                <span>Responses</span>
+              </div>
+              <Badge variant="outline">{responses.length} total</Badge>
             </div>
+
+            {responses.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 px-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 mb-3">
+                  <Inbox className="h-6 w-6 text-gray-400" />
+                </div>
             <p className="text-sm font-medium text-gray-500">No responses yet</p>
             <p className="text-xs text-gray-400 mt-1">
               Responses will appear here once users submit this form.
@@ -365,7 +382,28 @@ export function FormResponsesPage() {
             })}
           </div>
         )}
-      </div>
+          </div>
+        </TabsContent>
+
+        {/* Analytics Tab with Pie Charts */}
+        <TabsContent value="analytics">
+          {responses.length === 0 ? (
+            <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+              <div className="flex flex-col items-center justify-center py-20 px-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 mb-3">
+                  <PieChart className="h-6 w-6 text-gray-400" />
+                </div>
+                <p className="text-sm font-medium text-gray-500">No data for analytics</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Analytics will appear here once users submit this form.
+                </p>
+              </div>
+            </div>
+          ) : form ? (
+            <ResponseCharts form={form} responses={responses} />
+          ) : null}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
