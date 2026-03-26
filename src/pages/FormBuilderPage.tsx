@@ -185,7 +185,7 @@ export function FormBuilderPage() {
       <div className="grid grid-cols-[280px_1fr] gap-6">
         {/* Left: Block palette */}
         <div className="space-y-4">
-          <p className="text-sm text-gray-500">Drag and drop blocks to create your form</p>
+          <p className="text-sm text-gray-500">Click blocks to create your form</p>
           <BlockPalette onAddField={handleAddField} />
         </div>
 
