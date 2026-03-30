@@ -173,19 +173,6 @@ export function FormResponsesPage() {
           </div>
         );
 
-      case 'file':
-        return (
-          <div key={field.id} className="space-y-1.5">
-            <Label className="text-sm font-medium text-gray-700">
-              {field.label}
-              {field.required && <span className="ml-1 text-red-500">*</span>}
-            </Label>
-            <div className="flex items-center h-10 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-500">
-              {typeof value === 'string' && value ? value : 'No file uploaded'}
-            </div>
-          </div>
-        );
-
       default:
         return null;
     }

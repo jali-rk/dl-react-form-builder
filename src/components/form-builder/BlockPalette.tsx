@@ -3,7 +3,6 @@ import {
   AlignLeft,
   RadioIcon,
   CheckSquare,
-  Upload,
   Heading1,
   Heading2,
   Heading3,
@@ -77,12 +76,6 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     label: 'Checkbox',
     icon: CheckSquare,
     defaultLabel: 'Checkbox',
-  },
-  {
-    type: 'file',
-    label: 'File upload',
-    icon: Upload,
-    defaultLabel: 'File upload',
   },
 ];
 

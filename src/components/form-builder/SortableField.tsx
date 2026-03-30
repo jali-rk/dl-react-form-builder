@@ -95,21 +95,6 @@ function FieldPreview({ field }: { field: FormField }) {
         </div>
       );
 
-    case 'file':
-      return (
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700">
-            {field.label}
-            {field.required && <span className="ml-1 text-red-500">*</span>}
-          </label>
-          <div className="flex items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
-            <p className="text-xs text-gray-400">
-              {field.accept ? `Accepted: ${field.accept}` : 'Click to upload or drag and drop'}
-            </p>
-          </div>
-        </div>
-      );
-
     default:
       return null;
   }

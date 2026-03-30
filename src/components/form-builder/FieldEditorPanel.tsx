@@ -114,19 +114,6 @@ export function FieldEditorPanel({ field, onChange }: FieldEditorPanelProps) {
         </div>
       )}
 
-      {/* File accept */}
-      {field.type === 'file' && (
-        <div className="space-y-1.5">
-          <Label className="text-xs text-gray-600">Accepted file types</Label>
-          <Input
-            value={field.accept ?? ''}
-            onChange={(e) => onChange({ accept: e.target.value })}
-            placeholder="e.g. .pdf,.jpg,.png"
-            className="h-8 text-xs"
-          />
-        </div>
-      )}
-
       {/* Required toggle — not applicable for structural / divider fields */}
       {!isStructural && !isDivider && (
         <div className="flex items-center justify-between pt-1">

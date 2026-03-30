@@ -115,25 +115,6 @@ export function FormPreview({ fields }: FormPreviewProps) {
               </div>
             );
 
-          case 'file':
-            return (
-              <div key={field.id} className="space-y-1.5">
-                <Label className="text-sm font-medium text-gray-700">
-                  {field.label}
-                  {field.required && <span className="ml-1 text-red-500">*</span>}
-                </Label>
-                <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
-                  <p className="text-xs text-gray-400">
-                    Click to upload or drag and drop
-                  </p>
-                  {field.accept && (
-                    <p className="text-xs text-gray-300 mt-1">{field.accept}</p>
-                  )}
-                  <input type="file" className="hidden" accept={field.accept} />
-                </label>
-              </div>
-            );
-
           default:
             return null;
         }
