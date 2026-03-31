@@ -37,7 +37,7 @@ function App() {
             }
           />
 
-          {/* Admin-only routes */}
+          {/* Admin-only routes*/}
           <Route
             element={
               <ProtectedRoute allowedRoles={['admin']}>
