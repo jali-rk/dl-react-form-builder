@@ -91,12 +91,6 @@ export function PublicFormPage() {
     void loadForm();
   }, [id]);
 
-  // Validate email format
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   // Handle user info submission (name and email)
   const handleUserInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,11 +106,6 @@ export function PublicFormPage() {
     // Validate email
     if (!email.trim()) {
       setEmailError('Please enter your email address.');
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address.');
       return;
     }
 
@@ -359,7 +348,7 @@ export function PublicFormPage() {
             <Label htmlFor="email">Email Address</Label>
             <Input
               id="email"
-              type="email"
+              type="text"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => {
