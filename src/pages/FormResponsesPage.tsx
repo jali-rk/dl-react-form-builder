@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Users, ChevronDown, ChevronRight, Inbox, PieChart } from 'lucide-react';
+import { ArrowLeft, Download, Users, ChevronDown, ChevronRight, Inbox, PieChart, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -193,7 +193,7 @@ export function FormResponsesPage() {
       }
     }
 
-    const headers = ['#', 'Name', 'Submitted At', ...fieldLabels];
+    const headers = ['#', 'Email', 'Name', 'Submitted At', ...fieldLabels];
 
     const rows = responses.map((r, i) => {
       const answerMap = new Map(r.answers.map((a) => [a.field_id, a.value]));
@@ -202,7 +202,7 @@ export function FormResponsesPage() {
         if (!val) return '';
         return Array.isArray(val) ? val.join('; ') : val;
       });
-      return [String(i + 1), r.user_name, formatDate(r.submitted_at), ...values];
+      return [String(i + 1), r.user_email || '', r.user_name, formatDate(r.submitted_at), ...values];
     });
 
     const csvContent = [headers, ...rows]
@@ -321,11 +321,15 @@ export function FormResponsesPage() {
                       {idx + 1}
                     </span>
 
-                    {/* Name + date */}
+                    {/* Email + name */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {response.user_name}
+                      <p className="text-sm font-medium text-gray-900 truncate flex items-center gap-2">
+                        <Mail className="h-3.5 w-3.5 text-gray-400" />
+                        {response.user_email || response.user_name}
                       </p>
+                      {response.user_email && response.user_name && response.user_email !== response.user_name && (
+                        <p className="text-xs text-gray-400 truncate mt-0.5">{response.user_name}</p>
+                      )}
                     </div>
 
                     {/* Date */}

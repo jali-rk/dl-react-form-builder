@@ -16,6 +16,19 @@ const RESPONSES_COLLECTION = 'responses';
 
 export const responsesApi = {
   /**
+   * Check if an email has already submitted a specific form.
+   */
+  async hasSubmittedByEmail(formId: string, email: string): Promise<boolean> {
+    const q = query(
+      collection(db, RESPONSES_COLLECTION),
+      where('form_id', '==', formId),
+      where('user_email', '==', email.toLowerCase()),
+    );
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  },
+
+  /**
    * Check if a user has already submitted a specific form.
    */
   async hasSubmitted(formId: string, userId: string): Promise<boolean> {
@@ -26,6 +39,45 @@ export const responsesApi = {
     );
     const snapshot = await getDocs(q);
     return !snapshot.empty;
+  },
+
+  /**
+   * Submit a form response with answers (for public/anonymous users with name and email).
+   */
+  async submitPublic(
+    formId: string,
+    email: string,
+    userName: string,
+    answers: FormAnswer[],
+  ): Promise<FormResponse> {
+    const normalizedEmail = email.toLowerCase();
+    const alreadySubmitted = await this.hasSubmittedByEmail(formId, normalizedEmail);
+    if (alreadySubmitted) {
+      throw new Error('You have already submitted this form with this email address.');
+    }
+
+    const now = Timestamp.now();
+
+    const docData = {
+      form_id: formId,
+      user_id: normalizedEmail, // Use email as user_id for public submissions
+      user_name: userName.trim() || normalizedEmail.split('@')[0], // Use provided name or email prefix as fallback
+      user_email: normalizedEmail,
+      submitted_at: now,
+      answers,
+    };
+
+    const docRef = await addDoc(collection(db, RESPONSES_COLLECTION), docData);
+
+    return {
+      id: docRef.id,
+      form_id: formId,
+      user_id: normalizedEmail,
+      user_name: userName.trim() || normalizedEmail.split('@')[0],
+      user_email: normalizedEmail,
+      submitted_at: now.toDate().toISOString(),
+      answers,
+    };
   },
 
   /**
@@ -41,12 +93,14 @@ export const responsesApi = {
       throw new Error('You have already submitted this form.');
     }
 
-    // Look up user display name
+    // Look up user display name and email
     let userName = 'Unknown User';
+    let userEmail = '';
     try {
       const userDoc = await getDoc(doc(db, 'users', userId));
       if (userDoc.exists()) {
         userName = (userDoc.data().displayName as string) || userName;
+        userEmail = (userDoc.data().email as string) || '';
       }
     } catch {
       // Fall back to default name
@@ -58,6 +112,7 @@ export const responsesApi = {
       form_id: formId,
       user_id: userId,
       user_name: userName,
+      user_email: userEmail,
       submitted_at: now,
       answers,
     };
@@ -69,6 +124,7 @@ export const responsesApi = {
       form_id: formId,
       user_id: userId,
       user_name: userName,
+      user_email: userEmail,
       submitted_at: now.toDate().toISOString(),
       answers,
     };
@@ -102,6 +158,7 @@ export const responsesApi = {
         form_id: data.form_id as string,
         user_id: data.user_id as string,
         user_name: (data.user_name as string) || 'Unknown User',
+        user_email: (data.user_email as string) || '',
         submitted_at:
           data.submitted_at instanceof Timestamp
             ? data.submitted_at.toDate().toISOString()
@@ -165,6 +222,7 @@ export const responsesApi = {
           form_name: formName,
           user_id: data.user_id as string,
           user_name: (data.user_name as string) || 'Unknown User',
+          user_email: (data.user_email as string) || '',
           submitted_at:
             data.submitted_at instanceof Timestamp
               ? data.submitted_at.toDate().toISOString()

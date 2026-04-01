@@ -12,8 +12,6 @@ import { PublicFormPage } from '@/pages/PublicFormPage';
 import { FormsPage } from '@/pages/FormsPage';
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
-import { SignupPage } from '@/pages/SignupPage';
-import { UserDashboardPage } from '@/pages/UserDashboardPage';
 
 function App() {
   return (
@@ -23,19 +21,10 @@ function App() {
           {/* Public routes */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/forms/:id" element={<PublicFormPage />} />
+          
+          {/* Admin login routes */}
           <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
-          <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
           <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
-
-          {/* User dashboard */}
-          <Route
-            path="/user/dashboard"
-            element={
-              <ProtectedRoute allowedRoles={['user']}>
-                <UserDashboardPage />
-              </ProtectedRoute>
-            }
-          />
 
           {/* Admin-only routes*/}
           <Route
