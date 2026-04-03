@@ -8,11 +8,25 @@ import {
   where,
   orderBy,
   Timestamp,
+  limit,
+  startAfter,
+  getCountFromServer,
 } from 'firebase/firestore';
+import type { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { FormAnswer, FormResponse } from '@/types/form';
 
 const RESPONSES_COLLECTION = 'responses';
+
+/**
+ * Paginated response result type for server-side pagination.
+ */
+export interface PaginatedResponses {
+  responses: FormResponse[];
+  totalCount: number;
+  lastDoc: QueryDocumentSnapshot<DocumentData> | null;
+  hasMore: boolean;
+}
 
 export const responsesApi = {
   /**
@@ -233,5 +247,93 @@ export const responsesApi = {
     );
 
     return responses;
+  },
+
+  /**
+   * Get paginated responses for a specific form using Firestore cursor-based pagination.
+   * This is more efficient than client-side pagination for large datasets as it only
+   * fetches the required documents, reducing database read costs.
+   *
+   * @param formId - The ID of the form to get responses for
+   * @param pageSize - Number of items per page
+   * @param lastDocument - The last document from the previous page (for cursor-based pagination)
+   * @returns Paginated responses with metadata
+   */
+  async listByFormPaginated(
+    formId: string,
+    pageSize: number,
+    lastDocument?: QueryDocumentSnapshot<DocumentData> | null,
+  ): Promise<PaginatedResponses> {
+    // Get total count first (for displaying "X of Y entries")
+    const countQuery = query(
+      collection(db, RESPONSES_COLLECTION),
+      where('form_id', '==', formId),
+    );
+    const countSnapshot = await getCountFromServer(countQuery);
+    const totalCount = countSnapshot.data().count;
+
+    // Build the paginated query
+    let paginatedQuery;
+    try {
+      if (lastDocument) {
+        paginatedQuery = query(
+          collection(db, RESPONSES_COLLECTION),
+          where('form_id', '==', formId),
+          orderBy('submitted_at', 'desc'),
+          startAfter(lastDocument),
+          limit(pageSize),
+        );
+      } else {
+        paginatedQuery = query(
+          collection(db, RESPONSES_COLLECTION),
+          where('form_id', '==', formId),
+          orderBy('submitted_at', 'desc'),
+          limit(pageSize),
+        );
+      }
+    } catch {
+      // Fallback without ordering if index not ready
+      if (lastDocument) {
+        paginatedQuery = query(
+          collection(db, RESPONSES_COLLECTION),
+          where('form_id', '==', formId),
+          startAfter(lastDocument),
+          limit(pageSize),
+        );
+      } else {
+        paginatedQuery = query(
+          collection(db, RESPONSES_COLLECTION),
+          where('form_id', '==', formId),
+          limit(pageSize),
+        );
+      }
+    }
+
+    const snapshot = await getDocs(paginatedQuery);
+    const lastDoc = snapshot.docs.at(-1) ?? null;
+    const hasMore = snapshot.docs.length === pageSize;
+
+    const responses: FormResponse[] = snapshot.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        form_id: data.form_id as string,
+        user_id: data.user_id as string,
+        user_name: (data.user_name as string) || 'Unknown User',
+        user_email: (data.user_email as string) || '',
+        submitted_at:
+          data.submitted_at instanceof Timestamp
+            ? data.submitted_at.toDate().toISOString()
+            : (data.submitted_at as string),
+        answers: (data.answers as FormAnswer[]) ?? [],
+      };
+    });
+
+    return {
+      responses,
+      totalCount,
+      lastDoc,
+      hasMore,
+    };
   },
 };

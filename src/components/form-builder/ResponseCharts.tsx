@@ -1,10 +1,106 @@
 import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { BarChart3 } from 'lucide-react';
 import type { FormField, FormResponse } from '@/types/form';
 
 interface ResponseChartsProps {
   readonly form: { readonly fields: readonly FormField[] };
   readonly responses: readonly FormResponse[];
+  readonly isLoading?: boolean;
+}
+
+// Skeleton loader for individual chart cards
+function ChartSkeleton() {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm animate-pulse">
+      {/* Title skeleton */}
+      <div className="mb-4">
+        <div className="h-4 w-3/4 bg-gray-200 rounded" />
+        <div className="h-3 w-1/2 bg-gray-100 rounded mt-2" />
+      </div>
+
+      {/* Chart area skeleton */}
+      <div className="h-64 flex items-center justify-center">
+        <div className="relative">
+          {/* Donut chart skeleton */}
+          <div className="w-40 h-40 rounded-full border-[20px] border-gray-200 bg-white" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full bg-white" />
+          </div>
+        </div>
+        {/* Legend skeleton */}
+        <div className="ml-6 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-gray-200" />
+            <div className="h-3 w-16 bg-gray-200 rounded" />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-gray-200" />
+            <div className="h-3 w-20 bg-gray-200 rounded" />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-gray-200" />
+            <div className="h-3 w-14 bg-gray-200 rounded" />
+          </div>
+        </div>
+      </div>
+
+      {/* Table skeleton */}
+      <div className="mt-4 border-t border-gray-100 pt-4 space-y-2">
+        <div className="flex justify-between">
+          <div className="h-3 w-1/3 bg-gray-100 rounded" />
+          <div className="h-3 w-12 bg-gray-100 rounded" />
+          <div className="h-3 w-10 bg-gray-100 rounded" />
+        </div>
+        <div className="flex justify-between">
+          <div className="h-3 w-1/4 bg-gray-100 rounded" />
+          <div className="h-3 w-12 bg-gray-100 rounded" />
+          <div className="h-3 w-10 bg-gray-100 rounded" />
+        </div>
+        <div className="flex justify-between">
+          <div className="h-3 w-2/5 bg-gray-100 rounded" />
+          <div className="h-3 w-12 bg-gray-100 rounded" />
+          <div className="h-3 w-10 bg-gray-100 rounded" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Loading state with skeleton loaders
+function LoadingState() {
+  return (
+    <div className="space-y-6">
+      {/* Header skeleton */}
+      <div className="flex items-center gap-2">
+        <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
+        <div className="h-5 w-20 bg-gray-100 rounded animate-pulse" />
+      </div>
+
+      {/* Chart skeletons grid */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <ChartSkeleton />
+        <ChartSkeleton />
+      </div>
+    </div>
+  );
+}
+
+// Empty state when no analytics data is available
+function EmptyState() {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div className="flex flex-col items-center justify-center py-20 px-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 mb-4">
+          <BarChart3 className="h-7 w-7 text-gray-400" />
+        </div>
+        <h3 className="text-base font-medium text-gray-700 mb-1">No analytics data available yet</h3>
+        <p className="text-sm text-gray-500 text-center max-w-sm">
+          Analytics will appear here once users submit responses to questions with selectable options (radio buttons or checkboxes).
+        </p>
+      </div>
+    </div>
+  );
 }
 
 // Color palette for pie chart segments
@@ -35,7 +131,7 @@ interface FieldChartData {
   totalResponses: number;
 }
 
-export function ResponseCharts({ form, responses }: ResponseChartsProps) {
+export function ResponseCharts({ form, responses, isLoading = false }: ResponseChartsProps) {
   // Only process radio and checkbox fields (fields with discrete options)
   const chartableFields = useMemo(() => {
     return form.fields.filter(
@@ -94,8 +190,14 @@ export function ResponseCharts({ form, responses }: ResponseChartsProps) {
   // Filter out fields with no responses
   const chartsWithData = chartsData.filter((chart) => chart.data.length > 0);
 
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  // Show empty state when no chartable data is available
   if (chartsWithData.length === 0) {
-    return null;
+    return <EmptyState />;
   }
 
   return (

@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Users, ChevronDown, ChevronRight, Inbox, PieChart, Mail } from 'lucide-react';
+import { ArrowLeft, Download, Users, ChevronDown, ChevronRight, Inbox, PieChart, Mail, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,9 @@ import { responsesApi } from '@/api/responsesApi';
 import { ResponseCharts } from '@/components/form-builder/ResponseCharts';
 import type { FormTemplate, FormResponse, FormField, FormAnswer } from '@/types/form';
 
+// Pagination options for rows per page dropdown
+const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100] as const;
+
 export function FormResponsesPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -21,6 +24,40 @@ export function FormResponsesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(ROWS_PER_PAGE_OPTIONS[0]);
+
+  // Calculate pagination values
+  const totalItems = responses.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+  // Get paginated responses using client-side slicing
+  const paginatedResponses = useMemo(() => {
+    return responses.slice(startIndex, endIndex);
+  }, [responses, startIndex, endIndex]);
+
+  // Handle rows per page change - reset to first page
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
+  // Handle page navigation
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -292,7 +329,7 @@ export function FormResponsesPage() {
                 <Users className="h-4 w-4" />
                 <span>Responses</span>
               </div>
-              <Badge variant="outline">{responses.length} total</Badge>
+              <Badge variant="outline">{totalItems} total</Badge>
             </div>
 
             {responses.length === 0 ? (
@@ -307,8 +344,10 @@ export function FormResponsesPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {responses.map((response, idx) => {
+            {paginatedResponses.map((response, idx) => {
               const isExpanded = expandedId === response.id;
+              // Calculate the actual index based on pagination
+              const actualIndex = startIndex + idx + 1;
               return (
                 <div key={response.id}>
                   {/* Row */}
@@ -318,7 +357,7 @@ export function FormResponsesPage() {
                   >
                     {/* Index */}
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500">
-                      {idx + 1}
+                      {actualIndex}
                     </span>
 
                     {/* Email + name */}
@@ -373,26 +412,82 @@ export function FormResponsesPage() {
             })}
           </div>
         )}
+
+            {/* Pagination Controls */}
+            {responses.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-200 bg-gray-50 px-5 py-3">
+                {/* Rows per page selector */}
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="rows-per-page" className="text-sm text-gray-600 whitespace-nowrap">
+                    Rows per page:
+                  </Label>
+                  <select
+                    id="rows-per-page"
+                    value={itemsPerPage}
+                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                    className="h-8 rounded-md border border-gray-200 bg-white px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
+                  >
+                    {ROWS_PER_PAGE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Status text */}
+                <p className="text-sm text-gray-500">
+                  Showing {startIndex + 1} to {endIndex} of {totalItems} entries
+                </p>
+
+                {/* Navigation buttons */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={goToPreviousPage}
+                    disabled={currentPage === 1}
+                    className="gap-1"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+                  <span className="text-sm text-gray-600 px-2">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={goToNextPage}
+                    disabled={currentPage === totalPages}
+                    className="gap-1"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </TabsContent>
 
         {/* Analytics Tab with Pie Charts */}
         <TabsContent value="analytics">
-          {responses.length === 0 ? (
+          {form ? (
+            <ResponseCharts form={form} responses={responses} isLoading={loading} />
+          ) : (
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
               <div className="flex flex-col items-center justify-center py-20 px-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 mb-3">
                   <PieChart className="h-6 w-6 text-gray-400" />
                 </div>
-                <p className="text-sm font-medium text-gray-500">No data for analytics</p>
+                <p className="text-sm font-medium text-gray-500">No form data available</p>
                 <p className="text-xs text-gray-400 mt-1">
-                  Analytics will appear here once users submit this form.
+                  Unable to load form structure.
                 </p>
               </div>
             </div>
-          ) : form ? (
-            <ResponseCharts form={form} responses={responses} />
-          ) : null}
+          )}
         </TabsContent>
       </Tabs>
     </div>
