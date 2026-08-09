@@ -4,8 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import type { FormField, FieldOption } from '@/types/form';
+import type { FieldOption, FormField } from '@/types/form';
 
 interface FieldEditorPanelProps {
   field: FormField;
@@ -17,6 +18,7 @@ export function FieldEditorPanel({ field, onChange }: FieldEditorPanelProps) {
   const isDivider = field.type === 'divider';
   const hasOptions = field.type === 'radio' || field.type === 'checkbox';
   const hasPlaceholder = field.type === 'text' || field.type === 'textarea';
+  const isFileUpload = field.type === 'file_upload';
 
   const addOption = () => {
     const options: FieldOption[] = [
@@ -112,6 +114,39 @@ export function FieldEditorPanel({ field, onChange }: FieldEditorPanelProps) {
             Add option
           </Button>
         </div>
+      )}
+
+      {/* File upload config */}
+      {isFileUpload && (
+        <>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-gray-600">Accepted file types</Label>
+            <Select
+              value={field.acceptedFileTypes ?? 'both'}
+              onValueChange={(v) => onChange({ acceptedFileTypes: v as FormField['acceptedFileTypes'] })}
+            >
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="images">Images only (JPG, PNG, WebP, GIF)</SelectItem>
+                <SelectItem value="pdfs">PDFs only</SelectItem>
+                <SelectItem value="both">Images & PDFs</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-gray-600">Max file size (MB)</Label>
+            <Input
+              type="number"
+              min={1}
+              max={50}
+              value={field.maxFileSizeMB ?? 10}
+              onChange={(e) => onChange({ maxFileSizeMB: Math.min(50, Math.max(1, Number(e.target.value))) })}
+              className="h-8 text-xs"
+            />
+          </div>
+        </>
       )}
 
       {/* Required toggle — not applicable for structural / divider fields */}

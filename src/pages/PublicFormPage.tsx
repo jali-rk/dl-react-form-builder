@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { formsApi } from '@/api/formsApi';
 import { responsesApi } from '@/api/responsesApi';
+import { FileUploadField } from '@/components/form-builder/FileUploadField';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -295,6 +296,18 @@ export function PublicFormPage() {
               ))}
             </div>
           </div>
+        );
+
+      case 'file_upload':
+        return (
+          <FileUploadField
+            key={field.id}
+            field={field}
+            formId={id ?? ''}
+            userEmail={email}
+            value={(answers[field.id] as string) ?? ''}
+            onChange={(url) => updateAnswer(field.id, url)}
+          />
         );
 
       default:

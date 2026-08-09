@@ -1,3 +1,5 @@
+import { Upload } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -114,6 +116,27 @@ export function FormPreview({ fields }: FormPreviewProps) {
                 </div>
               </div>
             );
+
+          case 'file_upload': {
+            const acceptLabel =
+              field.acceptedFileTypes === 'images' ? 'Images (JPG, PNG, WebP, GIF)'
+              : field.acceptedFileTypes === 'pdfs' ? 'PDFs only'
+              : 'Images & PDFs';
+            return (
+              <div key={field.id} className="space-y-1.5">
+                <Label className="text-sm font-medium text-gray-700">
+                  {field.label}
+                  {field.required && <span className="ml-1 text-red-500">*</span>}
+                </Label>
+                <div className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 px-4 py-8">
+                  <Upload className="h-6 w-6 text-gray-400" />
+                  <p className="text-sm text-gray-500">Click or drag to upload</p>
+                  <p className="text-xs text-gray-400">{acceptLabel} · max {field.maxFileSizeMB ?? 10} MB</p>
+                  <input type="file" className="hidden" />
+                </div>
+              </div>
+            );
+          }
 
           default:
             return null;

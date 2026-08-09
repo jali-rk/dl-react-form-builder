@@ -7,7 +7,10 @@ export type FieldType =
   | 'text'
   | 'textarea'
   | 'radio'
-  | 'checkbox';
+  | 'checkbox'
+  | 'file_upload';
+
+export type FileUploadAccept = 'images' | 'pdfs' | 'both';
 
 export type FormType = 'Public' | 'Private';
 export type FormStatus = 'published' | 'draft';
@@ -24,6 +27,8 @@ export interface FormField {
   placeholder?: string;
   required: boolean;
   options?: FieldOption[]; // for radio and checkbox
+  acceptedFileTypes?: FileUploadAccept; // for file_upload
+  maxFileSizeMB?: number; // for file_upload
 }
 
 export interface FormTemplate {

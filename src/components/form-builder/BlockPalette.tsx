@@ -8,6 +8,7 @@ import {
   Heading3,
   Minus,
   Text,
+  Upload,
 } from 'lucide-react';
 
 import type { FieldType } from '@/types/form';
@@ -76,6 +77,12 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     label: 'Checkbox',
     icon: CheckSquare,
     defaultLabel: 'Checkbox',
+  },
+  {
+    type: 'file_upload',
+    label: 'File Upload',
+    icon: Upload,
+    defaultLabel: 'Upload a file',
   },
 ];
 
