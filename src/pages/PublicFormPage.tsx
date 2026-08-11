@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { formsApi } from '@/api/formsApi';
 import { responsesApi } from '@/api/responsesApi';
+import { ref, deleteObject } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
 import { FileUploadField } from '@/components/form-builder/FileUploadField';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,6 +55,7 @@ export function PublicFormPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
+  const [errorDialog, setErrorDialog] = useState<{ title: string; message: string } | null>(null);
 
   // Answer state
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
@@ -173,7 +176,10 @@ export function PublicFormPage() {
 
     const missingField = validateRequiredFields();
     if (missingField) {
-      alert(`Please fill in the required field: "${missingField}"`);
+      setErrorDialog({
+        title: 'Required Field Missing',
+        message: `Please fill in the required field:\n"${missingField}"`,
+      });
       return;
     }
 
@@ -186,14 +192,38 @@ export function PublicFormPage() {
       if (err instanceof Error && err.message.includes('already submitted')) {
         setAlreadySubmitted(true);
       } else {
-        alert(err instanceof Error ? err.message : 'Submission failed. Please try again.');
+        setErrorDialog({
+          title: 'Submission Failed',
+          message: err instanceof Error ? err.message : 'Submission failed. Please try again.',
+        });
       }
     } finally {
       setSubmitting(false);
     }
   };
 
+  const cleanupUploadedFiles = async () => {
+    if (!form) return;
+    const fileFields = form.fields.filter((f) => f.type === 'file_upload');
+    
+    const deletePromises = fileFields.map(async (field) => {
+      const url = answers[field.id];
+      if (typeof url === 'string' && url.trim() !== '') {
+        try {
+          const fileRef = ref(storage, url);
+          await deleteObject(fileRef);
+          console.log(`Successfully deleted orphaned file from storage: ${url}`);
+        } catch {
+          // Silent catch
+        }
+      }
+    });
+
+    await Promise.all(deletePromises);
+  };
+
   const handleBackToUserInfo = () => {
+    void cleanupUploadedFiles();
     setUserInfoSubmitted(false);
     setAnswers({});
   };
@@ -584,6 +614,41 @@ export function PublicFormPage() {
               Yes, Cancel
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error / Alert dialog */}
+      <Dialog open={!!errorDialog} onOpenChange={(open) => { if (!open) setErrorDialog(null); }}>
+        <DialogContent className="max-w-sm text-center">
+          <DialogHeader className="items-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-2">
+              <XCircle className="h-8 w-8 text-red-500" />
+            </div>
+            <DialogTitle className="text-xl text-gray-900">{errorDialog?.title}</DialogTitle>
+            <DialogDescription className="text-sm text-gray-500 mt-2 whitespace-pre-line">
+              {errorDialog?.message}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="justify-center sm:justify-center mt-4">
+            <Button onClick={() => setErrorDialog(null)} className="w-full sm:w-auto px-6">
+              Dismiss
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Submitting Progress Dialog */}
+      <Dialog open={submitting} onOpenChange={() => {}}>
+        <DialogContent className="max-w-sm text-center" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader className="items-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 mb-2">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-900" />
+            </div>
+            <DialogTitle className="text-xl font-bold text-gray-900">Submitting Form...</DialogTitle>
+            <DialogDescription className="text-sm text-gray-500 mt-1">
+              Please wait while we submit your response.
+            </DialogDescription>
+          </DialogHeader>
         </DialogContent>
       </Dialog>
     </div>

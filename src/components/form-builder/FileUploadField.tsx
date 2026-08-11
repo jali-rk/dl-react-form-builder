@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Upload, X, FileText, ImageIcon, Loader2, CheckCircle2 } from 'lucide-react';
 
 import { storage } from '@/lib/firebase';
@@ -32,6 +32,24 @@ function isFileAllowed(file: File, acceptedFileTypes: FormField['acceptedFileTyp
   }
 }
 
+const getFileNameFromUrl = (url: string): string => {
+  if (!url) return '';
+  try {
+    const decoded = decodeURIComponent(url);
+    const pathPart = decoded.split('/o/')[1]?.split('?')[0];
+    const target = pathPart || decoded.split('?')[0];
+    const segments = target.split('/');
+    const fullFileName = segments[segments.length - 1];
+    const match = fullFileName.match(/^\d+_(.+)$/);
+    if (match) {
+      return match[1];
+    }
+    return fullFileName || 'Uploaded File';
+  } catch {
+    return 'Uploaded File';
+  }
+};
+
 export function FileUploadField({ field, formId, userEmail, value, onChange }: FileUploadFieldProps) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -41,6 +59,17 @@ export function FileUploadField({ field, formId, userEmail, value, onChange }: F
   const inputRef = useRef<HTMLInputElement>(null);
 
   const maxBytes = (field.maxFileSizeMB ?? 10) * 1024 * 1024;
+
+  const deleteOldFile = async (url: string) => {
+    if (!url) return;
+    try {
+      const oldRef = ref(storage, url);
+      await deleteObject(oldRef);
+      console.log('Successfully deleted old file from storage:', url);
+    } catch {
+      // Silent catch
+    }
+  };
 
   const handleFile = (file: File) => {
     setError(null);
@@ -58,6 +87,8 @@ export function FileUploadField({ field, formId, userEmail, value, onChange }: F
       setError(`File exceeds the ${field.maxFileSizeMB ?? 10} MB limit.`);
       return;
     }
+
+    const oldUrl = value;
 
     // Sanitize filename to avoid path injection
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -82,6 +113,9 @@ export function FileUploadField({ field, formId, userEmail, value, onChange }: F
         getDownloadURL(uploadTask.snapshot.ref).then((url) => {
           setUploading(false);
           onChange(url);
+          if (oldUrl) {
+            void deleteOldFile(oldUrl);
+          }
         });
       },
     );
@@ -100,6 +134,9 @@ export function FileUploadField({ field, formId, userEmail, value, onChange }: F
   };
 
   const handleRemove = () => {
+    if (value) {
+      void deleteOldFile(value);
+    }
     onChange('');
     setFileName(null);
     setProgress(0);
@@ -111,7 +148,8 @@ export function FileUploadField({ field, formId, userEmail, value, onChange }: F
     : field.acceptedFileTypes === 'pdfs' ? 'PDF'
     : 'JPG, PNG, WebP, GIF, PDF';
 
-  const isImage = fileName && /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+  const hasFile = !!value;
+  const displayFileName = value ? getFileNameFromUrl(value) : '';
 
   return (
     <div className="space-y-1.5">
@@ -120,12 +158,12 @@ export function FileUploadField({ field, formId, userEmail, value, onChange }: F
         {field.required && <span className="ml-1 text-red-500">*</span>}
       </label>
 
-      {value ? (
+      {hasFile ? (
         // Uploaded state
         <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3">
           <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-green-800 truncate">{fileName ?? 'File uploaded'}</p>
+            <p className="text-sm font-medium text-green-800 truncate">{displayFileName || 'File uploaded'}</p>
             <a
               href={value}
               target="_blank"
