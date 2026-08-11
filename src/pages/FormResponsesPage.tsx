@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Users, ChevronDown, ChevronRight, Inbox, PieChart, Mail, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, Download, Users, ChevronDown, ChevronRight, Inbox, PieChart, Mail, ChevronLeft, FileText, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -207,6 +207,53 @@ export function FormResponsesPage() {
                 </label>
               ))}
             </div>
+          </div>
+        );
+
+      case 'file':
+        const url = typeof value === 'string' ? value : '';
+        let fileName = 'Uploaded File';
+        if (url) {
+          try {
+            // Decode and extract filename
+            const decoded = decodeURIComponent(url.split('/o/')[1].split('?')[0]);
+            const parts = decoded.split('/');
+            const fullName = parts[parts.length - 1];
+            // Remove UUID prefix (e.g. 123e4567-e89b-12d3-a456-426614174000_filename.ext)
+            const firstUnderscore = fullName.indexOf('_');
+            fileName = firstUnderscore !== -1 ? fullName.substring(firstUnderscore + 1) : fullName;
+          } catch {
+            fileName = 'View Uploaded File';
+          }
+        }
+        
+        return (
+          <div key={field.id} className="space-y-1.5">
+            <Label className="text-sm font-medium text-gray-700">
+              {field.label}
+              {field.required && <span className="ml-1 text-red-500">*</span>}
+            </Label>
+            {!url ? (
+              <p className="text-sm text-gray-400 italic">No file uploaded</p>
+            ) : (
+              <div className="flex items-center justify-between gap-4 p-3 rounded-lg border border-gray-200 bg-white shadow-sm hover:border-gray-300 transition-all">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <FileText className="h-4.5 w-4.5 text-gray-400 shrink-0" />
+                  <span className="text-sm font-medium text-gray-700 truncate" title={fileName}>
+                    {fileName}
+                  </span>
+                </div>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  View
+                </a>
+              </div>
+            )}
           </div>
         );
 

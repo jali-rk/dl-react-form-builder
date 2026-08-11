@@ -1,6 +1,7 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { UploadCloud } from 'lucide-react';
 import type { FormField } from '@/types/form';
 
 interface FormPreviewProps {
@@ -111,6 +112,21 @@ export function FormPreview({ fields }: FormPreviewProps) {
                   {(field.options ?? []).length === 0 && (
                     <p className="text-xs text-gray-400 italic">No options added</p>
                   )}
+                </div>
+              </div>
+            );
+
+          case 'file':
+            return (
+              <div key={field.id} className="space-y-1.5">
+                <Label className="text-sm font-medium text-gray-700">
+                  {field.label}
+                  {field.required && <span className="ml-1 text-red-500">*</span>}
+                </Label>
+                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-6 bg-gray-50/50 cursor-not-allowed opacity-75">
+                  <UploadCloud className="h-6 w-6 text-gray-400 mb-2" />
+                  <p className="text-xs text-gray-500 font-medium">Drag & drop or click to upload</p>
+                  <p className="text-[10px] text-gray-400 mt-1">Images, PDFs, Word docs up to 5MB (Disabled in Preview)</p>
                 </div>
               </div>
             );

@@ -4,6 +4,7 @@ import {
   GripVertical,
   Settings2,
   Trash2,
+  UploadCloud,
 } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
@@ -91,6 +92,21 @@ function FieldPreview({ field }: { field: FormField }) {
                 {opt.label}
               </label>
             ))}
+          </div>
+        </div>
+      );
+
+    case 'file':
+      return (
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-gray-700">
+            {field.label}
+            {field.required && <span className="ml-1 text-red-500">*</span>}
+          </label>
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-6 bg-gray-50/50">
+            <UploadCloud className="h-6 w-6 text-gray-400 mb-2" />
+            <p className="text-xs text-gray-500 font-medium">Drag & drop or click to upload</p>
+            <p className="text-[10px] text-gray-400 mt-1">Images, PDFs, Word docs up to 5MB</p>
           </div>
         </div>
       );

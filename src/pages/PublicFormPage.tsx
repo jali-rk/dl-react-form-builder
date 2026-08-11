@@ -3,6 +3,9 @@ import { useParams } from 'react-router-dom';
 import { formsApi } from '@/api/formsApi';
 import { responsesApi } from '@/api/responsesApi';
 import { Button } from '@/components/ui/button';
+import { FileUploadField } from '@/components/form-builder/FileUploadField';
+import { ref, deleteObject } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
 import {
   Dialog,
   DialogContent,
@@ -55,6 +58,8 @@ export function PublicFormPage() {
 
   // Answer state
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [uploadingFields, setUploadingFields] = useState<Record<string, boolean>>({});
+  const [validationError, setValidationError] = useState<string | null>(null);
 
 
   // Load form on mount
@@ -172,7 +177,7 @@ export function PublicFormPage() {
 
     const missingField = validateRequiredFields();
     if (missingField) {
-      alert(`Please fill in the required field: "${missingField}"`);
+      setValidationError(missingField);
       return;
     }
 
@@ -192,18 +197,38 @@ export function PublicFormPage() {
     }
   };
 
-  const handleBackToUserInfo = () => {
-    setUserInfoSubmitted(false);
-    setAnswers({});
+  const cleanupUploadedFiles = async () => {
+    if (!form) return;
+    const fileFields = form.fields.filter((f) => f.type === 'file');
+    for (const field of fileFields) {
+      const url = answers[field.id];
+      if (typeof url === 'string' && url) {
+        try {
+          const fileRef = ref(storage, url);
+          await deleteObject(fileRef);
+        } catch (err) {
+          console.warn('Failed to delete file on cleanup:', err);
+        }
+      }
+    }
   };
 
-  const handleStartOver = () => {
+  const handleBackToUserInfo = async () => {
+    await cleanupUploadedFiles();
+    setUserInfoSubmitted(false);
+    setAnswers({});
+    setUploadingFields({});
+  };
+
+  const handleStartOver = async () => {
+    await cleanupUploadedFiles();
     setName('');
     setEmail('');
     setUserInfoSubmitted(false);
     setAlreadySubmitted(false);
     setSubmitted(false);
     setAnswers({});
+    setUploadingFields({});
   };
 
   // Render a single input field
@@ -295,6 +320,23 @@ export function PublicFormPage() {
               ))}
             </div>
           </div>
+        );
+
+      case 'file':
+        return (
+          <FileUploadField
+            key={field.id}
+            formId={form?.id ?? id ?? ''}
+            fieldId={field.id}
+            userEmail={email}
+            label={field.label}
+            required={field.required}
+            value={(answers[field.id] as string) ?? ''}
+            onChange={(val) => updateAnswer(field.id, val)}
+            onUploadStateChange={(isUploading) =>
+              setUploadingFields((prev) => ({ ...prev, [field.id]: isUploading }))
+            }
+          />
         );
 
       default:
@@ -417,7 +459,7 @@ export function PublicFormPage() {
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={submitting}
+              disabled={submitting || Object.values(uploadingFields).some(Boolean)}
             >
               {submitting ? 'Submitting...' : 'Submit'}
             </Button>
@@ -569,6 +611,26 @@ export function PublicFormPage() {
             </Button>
             <Button variant="destructive" onClick={() => { setShowCancel(false); handleBackToUserInfo(); }}>
               Yes, Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Validation error dialog */}
+      <Dialog open={!!validationError} onOpenChange={(open) => !open && setValidationError(null)}>
+        <DialogContent className="max-w-sm text-center">
+          <DialogHeader className="items-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 mb-2 border border-red-100">
+              <AlertCircle className="h-6 w-6 text-red-500" />
+            </div>
+            <DialogTitle className="text-lg font-semibold text-gray-900">Missing Required Field</DialogTitle>
+            <DialogDescription className="text-sm text-gray-500">
+              Please fill in the required field: <strong className="text-gray-900 font-semibold">"{validationError}"</strong> before submitting the form.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="justify-center sm:justify-center mt-1">
+            <Button onClick={() => setValidationError(null)} className="w-full sm:w-24">
+              OK
             </Button>
           </DialogFooter>
         </DialogContent>

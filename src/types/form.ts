@@ -7,7 +7,8 @@ export type FieldType =
   | 'text'
   | 'textarea'
   | 'radio'
-  | 'checkbox';
+  | 'checkbox'
+  | 'file';
 
 export type FormType = 'Public' | 'Private';
 export type FormStatus = 'published' | 'draft';
