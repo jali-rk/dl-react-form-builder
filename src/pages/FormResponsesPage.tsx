@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Users, ChevronDown, ChevronRight, Inbox, PieChart, Mail, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, Download, Users, ChevronDown, ChevronRight, Inbox, PieChart, Mail, ChevronLeft, FileText, ImageIcon, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,33 @@ import type { FormTemplate, FormResponse, FormField, FormAnswer } from '@/types/
 
 // Pagination options for rows per page dropdown
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100] as const;
+
+const getFileNameFromUrl = (url: string): string => {
+  if (!url) return '';
+  try {
+    const decoded = decodeURIComponent(url);
+    const pathPart = decoded.split('/o/')[1]?.split('?')[0];
+    const target = pathPart || decoded.split('?')[0];
+    const segments = target.split('/');
+    const fullFileName = segments[segments.length - 1];
+    const match = fullFileName.match(/^\d+_(.+)$/);
+    if (match) {
+      return match[1];
+    }
+    return fullFileName || 'Uploaded File';
+  } catch {
+    return 'Uploaded File';
+  }
+};
+
+const isImageUrl = (url: string): boolean => {
+  try {
+    const cleanUrl = decodeURIComponent(url).split('?')[0].toLowerCase();
+    return /\.(jpg|jpeg|png|gif|webp|svg)$/.test(cleanUrl);
+  } catch {
+    return false;
+  }
+};
 
 export function FormResponsesPage() {
   const { id } = useParams<{ id: string }>();
@@ -209,6 +236,65 @@ export function FormResponsesPage() {
             </div>
           </div>
         );
+
+      case 'file_upload': {
+        const fileUrl = typeof value === 'string' ? value : '';
+        const hasFile = !!fileUrl;
+        const fileName = hasFile ? getFileNameFromUrl(fileUrl) : '';
+        const isImage = hasFile && isImageUrl(fileUrl);
+
+        return (
+          <div key={field.id} className="space-y-1.5">
+            <Label className="text-sm font-medium text-gray-700">
+              {field.label}
+              {field.required && <span className="ml-1 text-red-500">*</span>}
+            </Label>
+            {hasFile ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                  {isImage ? (
+                    <ImageIcon className="h-5 w-5 shrink-0 text-blue-500" />
+                  ) : (
+                    <FileText className="h-5 w-5 shrink-0 text-amber-500" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-700 truncate">{fileName}</p>
+                    <a
+                      href={fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-green-600 hover:text-green-800 underline inline-flex items-center gap-1 mt-0.5"
+                    >
+                      <Eye className="h-3 w-3" /> View file
+                    </a>
+                  </div>
+                </div>
+                {isImage && (
+                  <div className="mt-2 relative group overflow-hidden rounded-lg border border-gray-200 bg-white max-w-xs aspect-video flex items-center justify-center">
+                    <img
+                      src={fileUrl}
+                      alt={fileName}
+                      className="object-contain w-full h-full max-h-40 transition-transform duration-200 group-hover:scale-105"
+                    />
+                    <a
+                      href={fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-medium transition-opacity duration-200"
+                    >
+                      Open in new tab
+                    </a>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/50 px-4 py-3">
+                <p className="text-xs text-gray-400 italic">No file uploaded</p>
+              </div>
+            )}
+          </div>
+        );
+      }
 
       default:
         return null;

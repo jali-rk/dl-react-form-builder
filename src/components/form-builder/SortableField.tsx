@@ -4,6 +4,7 @@ import {
   GripVertical,
   Settings2,
   Trash2,
+  Upload,
 } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
@@ -94,6 +95,26 @@ function FieldPreview({ field }: { field: FormField }) {
           </div>
         </div>
       );
+
+    case 'file_upload': {
+      const acceptLabel =
+        field.acceptedFileTypes === 'images' ? 'Images (JPG, PNG, WebP, GIF)'
+        : field.acceptedFileTypes === 'pdfs' ? 'PDFs only'
+        : 'Images & PDFs';
+      return (
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-gray-700">
+            {field.label}
+            {field.required && <span className="ml-1 text-red-500">*</span>}
+          </label>
+          <div className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 px-4 py-6 pointer-events-none">
+            <Upload className="h-6 w-6 text-gray-400" />
+            <p className="text-xs text-gray-400">Click or drag to upload</p>
+            <p className="text-xs text-gray-300">{acceptLabel} · max {field.maxFileSizeMB ?? 10} MB</p>
+          </div>
+        </div>
+      );
+    }
 
     default:
       return null;
